@@ -3,59 +3,88 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>GitHub Pages テスト</title>
+  <title>Dify BOT デモ</title>
   <style>
     body {
       margin: 0;
-      padding: 24px;
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
       background: #f6f7f9;
       color: #111;
     }
-    .card {
-      max-width: 920px;
+    header {
+      padding: 16px 20px;
+      background: #ffffff;
+      border-bottom: 1px solid #e6e8ee;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    header p {
+      margin: 6px 0 0 0;
+      font-size: 13px;
+      color: #444;
+      line-height: 1.5;
+    }
+    main {
+      padding: 16px 20px 24px 20px;
+      max-width: 1100px;
       margin: 0 auto;
+    }
+    .frame-wrap {
       background: #ffffff;
       border: 1px solid #e6e8ee;
       border-radius: 12px;
-      padding: 20px;
+      overflow: hidden;
       box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
     }
-    h1 {
-      margin: 0 0 10px 0;
-      font-size: 22px;
+    iframe {
+      width: 100%;
+      height: 720px;
+      border: 0;
+      display: block;
     }
-    p {
-      margin: 8px 0;
-      line-height: 1.7;
-    }
-    .meta {
-      margin-top: 14px;
+    .note {
+      margin-top: 12px;
       font-size: 12px;
       color: #555;
-      background: #f0f2f6;
-      padding: 10px 12px;
-      border-radius: 10px;
+      line-height: 1.6;
+      background: #ffffff;
+      border: 1px solid #e6e8ee;
+      border-radius: 12px;
+      padding: 12px 14px;
     }
     code {
-      background: #eef1f6;
+      background: #f0f2f6;
       padding: 2px 6px;
       border-radius: 6px;
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>GitHub Pages テスト公開</h1>
-    <p>このページが表示できれば、GitHub Pagesの設定は完了です。</p>
-    <p>次に、DifyのBOTを埋め込む場合は、iframe版のHTMLに差し替えてください。</p>
+  <header>
+    <h1>Dify BOT デモ</h1>
+    <p>GitHub Pages上に、Difyのチャット画面を埋め込んだデモページです。</p>
+  </header>
 
-    <div class="meta">
-      <div>確認ポイント</div>
-      <div>1) リポジトリ名が <code>あなたのユーザー名.github.io</code> になっている</div>
-      <div>2) <code>index.html</code> が main ブランチのルートにある</div>
-      <div>3) Settings → Pages が main / (root) になっている</div>
+  <main>
+    <div class="frame-wrap">
+      <iframe
+        src="YOUR_DIFY_CHATBOT_URL"
+        allow="clipboard-write; microphone"
+        referrerpolicy="no-referrer"
+      ></iframe>
     </div>
-  </div>
+
+    <div class="note">
+      <div>置き換え箇所</div>
+      <div><code>YOUR_DIFY_CHATBOT_URL</code> をDifyが出すURLに差し替え</div>
+      <div>よくある失敗</div>
+      <div>1) URLの貼り間違い（トークン欠落）</div>
+      <div>2) Dify側が非公開設定のまま</div>
+      <div>3) ブラウザの埋め込み制限（相手側が iframe を拒否している）</div>
+    </div>
+  </main>
 </body>
 </html>
