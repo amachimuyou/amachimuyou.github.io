@@ -39,9 +39,47 @@
       overflow: hidden;
       box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
       padding: 16px;
+      margin-bottom: 12px;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 10px;
+      align-items: center;
+      margin: 10px 0;
+    }
+    label {
+      font-size: 13px;
+      color: #333;
+    }
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d7dbe6;
+      border-radius: 10px;
+      font-size: 14px;
+      background: #fff;
+      box-sizing: border-box;
+    }
+    .btns {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    button {
+      appearance: none;
+      border: 1px solid #d7dbe6;
+      background: #fff;
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button.primary {
+      border-color: #1C64F2;
     }
     .note {
-      margin-top: 12px;
       font-size: 12px;
       color: #555;
       line-height: 1.6;
@@ -55,47 +93,206 @@
       padding: 2px 6px;
       border-radius: 6px;
     }
+    .status {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #111;
+    }
+    .status small {
+      color: #555;
+    }
   </style>
 </head>
 <body>
   <header>
     <h1>AP BOT デモ</h1>
-    <p>このページ右下のチャットボタンからBOTを起動します（ローカルDifyをトンネル公開）。</p>
+    <p>ローカルDifyをCloudflare Quick TunnelでHTTPS公開し、このページから埋め込み起動します。</p>
   </header>
 
   <main>
     <div class="card">
-      <div>確認</div>
-      <div>1) トンネルURL（trycloudflare）が有効である</div>
-      <div>2) <code>TUNNEL_URLSCRIPT_PATH</code> が 200 で取れる</div>
-      <div>3) Dify側で埋め込みトークンが有効</div>
+      <div class="status" id="status">
+        状態: 未設定。下のフォームにトンネルURLとトークンを入れてください。
+        <br><small>注意: PowerShellでcloudflaredを起動したままにしてください。閉じると公開が止まります。</small>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <label for="baseUrl">トンネルURL</label>
+        <input id="baseUrl" type="text" placeholder="例: https://xxxxx.trycloudflare.com" />
+      </div>
+
+      <div class="row">
+        <label for="token">埋め込みトークン</label>
+        <input id="token" type="text" placeholder="例: ZDPHnH6mn8ISpPTh" />
+      </div>
+
+      <div class="row">
+        <label for="scriptPath">embedのパス</label>
+        <input id="scriptPath" type="text" value="/embed.min.js" />
+      </div>
+
+      <div class="btns">
+        <button class="primary" id="saveAndStart">保存して起動</button>
+        <button id="testScript">JS取得テスト</button>
+        <button id="clear">クリア</button>
+      </div>
+
+      <div class="note" style="margin-top:12px;">
+        <div>手順</div>
+        <div>1) PowerShellで <code>cloudflared tunnel --url http://localhost:80</code> を起動</div>
+        <div>2) 表示された <code>https://xxxxx.trycloudflare.com</code> を「トンネルURL」に貼る</div>
+        <div>3) ローカルDifyの Publish → Embed のトークンを貼る</div>
+        <div>4) 「保存して起動」</div>
+        <div style="margin-top:8px;">embedのパスが <code>/embed.min.js</code> でない場合は、DifyのEmbed画面に出るscriptのパスをそのまま入れてください。</div>
+      </div>
     </div>
 
     <div class="note">
-      <div>テスト用</div>
-      <div><code>TUNNEL_URL/</code></div>
-      <div><code>TUNNEL_URLSCRIPT_PATH</code></div>
-      <div>PowerShellを閉じると公開が止まります。</div>
+      <div>現実</div>
+      <div>GitHub Pagesから <code>http://localhost</code> には絶対に届きません。必ずトンネルの <code>https://...</code> が必要です。</div>
+      <div>デモ後はトークンを再発行して無効化してください（公開ページにトークンが載るため）。</div>
     </div>
   </main>
 
   <script>
-    (function () {
-      var baseUrl = 'TUNNEL_URL'.replace(/\/+$/, '');
+    function normalizeBaseUrl(url) {
+      if (!url) return "";
+      url = url.trim();
+      url = url.replace(/\/+$/, "");
+      return url;
+    }
+
+    function normalizeScriptPath(path) {
+      if (!path) return "/embed.min.js";
+      path = path.trim();
+      if (!path.startsWith("/")) path = "/" + path;
+      return path;
+    }
+
+    function setStatus(msg) {
+      document.getElementById("status").innerHTML = msg;
+    }
+
+    function loadEmbed(baseUrl, token, scriptPath) {
+      baseUrl = normalizeBaseUrl(baseUrl);
+      scriptPath = normalizeScriptPath(scriptPath);
+
+      if (!baseUrl || !token) {
+        setStatus("状態: 設定不足。トンネルURLとトークンを入力してください。");
+        return;
+      }
+
+      var scriptUrl = baseUrl + scriptPath;
+
       window.difyChatbotConfig = {
-        token: 'TOKEN',
+        token: token,
         baseUrl: baseUrl,
         inputs: {},
         systemVariables: {},
         userVariables: {}
       };
-    })();
-  </script>
 
-  <script
-    src="TUNNEL_URLSCRIPT_PATH"
-    id="TOKEN"
-    defer>
+      var old = document.getElementById("dify-embed-script");
+      if (old) old.remove();
+
+      var s = document.createElement("script");
+      s.id = "dify-embed-script";
+      s.src = scriptUrl;
+      s.defer = true;
+      s.onload = function () {
+        setStatus(
+          "状態: embed.min.js 読み込み成功。右下にボタンが出るはずです。<br>" +
+          "<small>baseUrl: <code>" + baseUrl + "</code> / script: <code>" + scriptUrl + "</code></small>"
+        );
+      };
+      s.onerror = function () {
+        setStatus(
+          "状態: embed.min.js 読み込み失敗。URLかパスが違います。<br>" +
+          "<small>script: <code>" + scriptUrl + "</code></small><br>" +
+          "<small>対策: 1) トンネルが生きているか 2) " + scriptPath + " が存在するか 3) DifyのEmbed画面のパスと一致しているか</small>"
+        );
+      };
+      document.body.appendChild(s);
+    }
+
+    function saveSettings() {
+      var baseUrl = document.getElementById("baseUrl").value;
+      var token = document.getElementById("token").value;
+      var scriptPath = document.getElementById("scriptPath").value;
+      localStorage.setItem("ap_demo_baseUrl", baseUrl);
+      localStorage.setItem("ap_demo_token", token);
+      localStorage.setItem("ap_demo_scriptPath", scriptPath);
+    }
+
+    function loadSettings() {
+      var baseUrl = localStorage.getItem("ap_demo_baseUrl") || "";
+      var token = localStorage.getItem("ap_demo_token") || "";
+      var scriptPath = localStorage.getItem("ap_demo_scriptPath") || "/embed.min.js";
+      document.getElementById("baseUrl").value = baseUrl;
+      document.getElementById("token").value = token;
+      document.getElementById("scriptPath").value = scriptPath;
+      return { baseUrl: baseUrl, token: token, scriptPath: scriptPath };
+    }
+
+    function testScriptUrl(baseUrl, scriptPath) {
+      baseUrl = normalizeBaseUrl(baseUrl);
+      scriptPath = normalizeScriptPath(scriptPath);
+      if (!baseUrl) {
+        setStatus("状態: トンネルURLが空です。");
+        return;
+      }
+      var scriptUrl = baseUrl + scriptPath;
+      fetch(scriptUrl, { method: "GET" })
+        .then(function (r) {
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          return r.text();
+        })
+        .then(function (t) {
+          setStatus(
+            "状態: JS取得テスト成功。<br><small>script: <code>" + scriptUrl + "</code></small>"
+          );
+        })
+        .catch(function (e) {
+          setStatus(
+            "状態: JS取得テスト失敗。<br>" +
+            "<small>script: <code>" + scriptUrl + "</code></small><br>" +
+            "<small>エラー: " + String(e) + "</small>"
+          );
+        });
+    }
+
+    document.getElementById("saveAndStart").addEventListener("click", function () {
+      saveSettings();
+      var s = loadSettings();
+      loadEmbed(s.baseUrl, s.token, s.scriptPath);
+    });
+
+    document.getElementById("testScript").addEventListener("click", function () {
+      var baseUrl = document.getElementById("baseUrl").value;
+      var scriptPath = document.getElementById("scriptPath").value;
+      testScriptUrl(baseUrl, scriptPath);
+    });
+
+    document.getElementById("clear").addEventListener("click", function () {
+      localStorage.removeItem("ap_demo_baseUrl");
+      localStorage.removeItem("ap_demo_token");
+      localStorage.removeItem("ap_demo_scriptPath");
+      document.getElementById("baseUrl").value = "";
+      document.getElementById("token").value = "";
+      document.getElementById("scriptPath").value = "/embed.min.js";
+      setStatus("状態: クリアしました。再入力してください。");
+      var old = document.getElementById("dify-embed-script");
+      if (old) old.remove();
+    });
+
+    (function init() {
+      var s = loadSettings();
+      if (s.baseUrl && s.token) {
+        loadEmbed(s.baseUrl, s.token, s.scriptPath);
+      }
+    })();
   </script>
 
   <style>
