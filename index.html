@@ -32,18 +32,13 @@
       max-width: 1100px;
       margin: 0 auto;
     }
-    .frame-wrap {
+    .card {
       background: #ffffff;
       border: 1px solid #e6e8ee;
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-    }
-    iframe {
-      width: 100%;
-      height: 720px;
-      border: 0;
-      display: block;
+      padding: 16px;
     }
     .note {
       margin-top: 12px;
@@ -64,64 +59,51 @@
 </head>
 <body>
   <header>
-    <h1>Dify BOT デモ</h1>
-    <p>GitHub Pages上に、Difyのチャット画面を埋め込んだデモページです。</p>
+    <h1>AP BOT デモ</h1>
+    <p>このページ右下のチャットボタンからBOTを起動します（埋め込みバブル方式）。</p>
   </header>
 
   <main>
-    <div class="frame-wrap">
-      <iframe
-        src="YOUR_DIFY_CHATBOT_URL"
-        allow="clipboard-write; microphone"
-        referrerpolicy="no-referrer"
-      ></iframe>
+    <div class="card">
+      <div>表示されない場合は、次を確認してください。</div>
+      <div>1) <code>YOUR_DIFY_BASE_URL</code> が HTTPS で外部公開されている</div>
+      <div>2) Dify側でアプリが公開され、埋め込みトークンが有効</div>
+      <div>3) GitHub Pages側の <code>index.html</code> が main ブランチのルートにある</div>
     </div>
 
     <div class="note">
-      <div>置き換え箇所</div>
-      <div><code>YOUR_DIFY_CHATBOT_URL</code> をDifyが出すURLに差し替え</div>
-      <div>よくある失敗</div>
-      <div>1) URLの貼り間違い（トークン欠落）</div>
-      <div>2) Dify側が非公開設定のまま</div>
-      <div>3) ブラウザの埋め込み制限（相手側が iframe を拒否している）</div>
+      <div>このページは GitHub Pages なので、<code>http://localhost</code> は絶対に使えません。</div>
+      <div>あなたのDifyがインターネットから到達できるURLを <code>baseUrl</code> に設定してください。</div>
     </div>
   </main>
 
   <script>
- window.difyChatbotConfig = {
-  token: 'ZDPHnH6mn8ISpPTh',
-  baseUrl: 'http://localhost',
-  inputs: {
-    // You can define the inputs from the Start node here
-    // key is the variable name
-    // e.g.
-    // name: "NAME"
-  },
-  systemVariables: {
-    // user_id: 'YOU CAN DEFINE USER ID HERE',
-    // conversation_id: 'YOU CAN DEFINE CONVERSATION ID HERE, IT MUST BE A VALID UUID',
-  },
-  userVariables: {
-    // avatar_url: 'YOU CAN DEFINE USER AVATAR URL HERE',
-    // name: 'YOU CAN DEFINE USER NAME HERE',
-  },
- }
-</script>
-<script
- src="http://localhost/embed.min.js"
- id="ZDPHnH6mn8ISpPTh"
- defer>
-</script>
-<style>
-  #dify-chatbot-bubble-button {
-    background-color: #1C64F2 !important;
-  }
-  #dify-chatbot-bubble-window {
-    width: 24rem !important;
-    height: 40rem !important;
-  }
-</style>
+    window.difyChatbotConfig = {
+      token: 'ZDPHnH6mn8ISpPTh',
+      baseUrl: 'YOUR_DIFY_BASE_URL',
+      inputs: {
+      },
+      systemVariables: {
+      },
+      userVariables: {
+      },
+    };
+  </script>
+
+  <script
+    src="YOUR_DIFY_BASE_URL/embed.min.js"
+    id="ZDPHnH6mn8ISpPTh"
+    defer>
+  </script>
+
+  <style>
+    #dify-chatbot-bubble-button {
+      background-color: #1C64F2 !important;
+    }
+    #dify-chatbot-bubble-window {
+      width: 24rem !important;
+      height: 40rem !important;
+    }
+  </style>
 </body>
 </html>
-
-
