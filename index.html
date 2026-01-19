@@ -32,14 +32,6 @@
       max-width: 1100px;
       margin: 0 auto;
     }
-    .card {
-      background: #ffffff;
-      border: 1px solid #e6e8ee;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-      padding: 16px;
-    }
     .note {
       margin-top: 12px;
       font-size: 12px;
@@ -59,40 +51,33 @@
 </head>
 <body>
   <header>
-    <h1>AP BOT デモ</h1>
+    <h1>Dify BOT デモ</h1>
     <p>このページ右下のチャットボタンからBOTを起動します（埋め込みバブル方式）。</p>
   </header>
 
   <main>
-    <div class="card">
-      <div>表示されない場合は、次を確認してください。</div>
-      <div>1) <code>YOUR_DIFY_BASE_URL</code> が HTTPS で外部公開されている</div>
-      <div>2) Dify側でアプリが公開され、埋め込みトークンが有効</div>
-      <div>3) GitHub Pages側の <code>index.html</code> が main ブランチのルートにある</div>
-    </div>
-
     <div class="note">
-      <div>このページは GitHub Pages なので、<code>http://localhost</code> は絶対に使えません。</div>
-      <div>あなたのDifyがインターネットから到達できるURLを <code>baseUrl</code> に設定してください。</div>
+      <div>確認ポイント</div>
+      <div>1) Dify側でアプリが公開され、埋め込みトークンが有効</div>
+      <div>2) baseUrl は https（Dify Cloudなら <code>https://udify.app</code>）</div>
+      <div>3) ブラウザの開発者ツール Console にエラーが出ていない</div>
     </div>
   </main>
 
   <script>
     window.difyChatbotConfig = {
-      token: 'ZDPHnH6mn8ISpPTh',
-      baseUrl: 'YOUR_DIFY_BASE_URL',
-      inputs: {
-      },
-      systemVariables: {
-      },
-      userVariables: {
-      },
+      token: 'DIFY_TOKEN',
+      baseUrl: 'https://udify.app',
+      isDev: false,
+      inputs: {},
+      systemVariables: {},
+      userVariables: {}
     };
   </script>
 
   <script
-    src="YOUR_DIFY_BASE_URL/embed.min.js"
-    id="ZDPHnH6mn8ISpPTh"
+    src="https://udify.app/embed.min.js"
+    id="DIFY_TOKEN"
     defer>
   </script>
 
