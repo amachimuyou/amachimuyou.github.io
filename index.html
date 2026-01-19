@@ -32,6 +32,14 @@
       max-width: 1100px;
       margin: 0 auto;
     }
+    .card {
+      background: #ffffff;
+      border: 1px solid #e6e8ee;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+      padding: 16px;
+    }
     .note {
       margin-top: 12px;
       font-size: 12px;
@@ -51,33 +59,42 @@
 </head>
 <body>
   <header>
-    <h1>Dify BOT デモ</h1>
-    <p>このページ右下のチャットボタンからBOTを起動します（埋め込みバブル方式）。</p>
+    <h1>AP BOT デモ</h1>
+    <p>このページ右下のチャットボタンからBOTを起動します（ローカルDifyをトンネル公開）。</p>
   </header>
 
   <main>
+    <div class="card">
+      <div>確認</div>
+      <div>1) トンネルURL（trycloudflare）が有効である</div>
+      <div>2) <code>TUNNEL_URLSCRIPT_PATH</code> が 200 で取れる</div>
+      <div>3) Dify側で埋め込みトークンが有効</div>
+    </div>
+
     <div class="note">
-      <div>確認ポイント</div>
-      <div>1) Dify側でアプリが公開され、埋め込みトークンが有効</div>
-      <div>2) baseUrl は https（Dify Cloudなら <code>https://udify.app</code>）</div>
-      <div>3) ブラウザの開発者ツール Console にエラーが出ていない</div>
+      <div>テスト用</div>
+      <div><code>TUNNEL_URL/</code></div>
+      <div><code>TUNNEL_URLSCRIPT_PATH</code></div>
+      <div>PowerShellを閉じると公開が止まります。</div>
     </div>
   </main>
 
   <script>
-    window.difyChatbotConfig = {
-      token: 'DIFY_TOKEN',
-      baseUrl: 'https://udify.app',
-      isDev: false,
-      inputs: {},
-      systemVariables: {},
-      userVariables: {}
-    };
+    (function () {
+      var baseUrl = 'TUNNEL_URL'.replace(/\/+$/, '');
+      window.difyChatbotConfig = {
+        token: 'TOKEN',
+        baseUrl: baseUrl,
+        inputs: {},
+        systemVariables: {},
+        userVariables: {}
+      };
+    })();
   </script>
 
   <script
-    src="https://udify.app/embed.min.js"
-    id="DIFY_TOKEN"
+    src="TUNNEL_URLSCRIPT_PATH"
+    id="TOKEN"
     defer>
   </script>
 
