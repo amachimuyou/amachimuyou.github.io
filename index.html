@@ -135,7 +135,8 @@
 
       <div class="btns">
         <button class="primary" id="saveAndStart">保存して起動</button>
-        <button id="testScript">JS取得テスト</button>
+        <button id="testScript">JS到達テスト</button>
+        <button id="openScript">JSを別タブで開く</button>
         <button id="clear">クリア</button>
       </div>
 
@@ -143,15 +144,15 @@
         <div>手順</div>
         <div>1) PowerShellで <code>cloudflared tunnel --url http://localhost:80</code> を起動</div>
         <div>2) 表示された <code>https://xxxxx.trycloudflare.com</code> を「トンネルURL」に貼る</div>
-        <div>3) ローカルDifyの Publish → Embed のトークンを貼る</div>
+        <div>3) ローカルDifyの「公開する」→「埋め込み」で token を貼る</div>
         <div>4) 「保存して起動」</div>
-        <div style="margin-top:8px;">embedのパスが <code>/embed.min.js</code> でない場合は、DifyのEmbed画面に出るscriptのパスをそのまま入れてください。</div>
+        <div style="margin-top:8px;">embedのパスが <code>/embed.min.js</code> でない場合は、Difyの埋め込みコードに出るscriptのパスをそのまま入れてください。</div>
       </div>
     </div>
 
     <div class="note">
       <div>現実</div>
-      <div>GitHub Pagesから <code>http://localhost</code> には絶対に届きません。必ずトンネルの <code>https://...</code> が必要です。</div>
+      <div>GitHub Pagesから <code>http://localhost</code> には届きません。必ずトンネルの <code>https://...</code> が必要です。</div>
       <div>デモ後はトークンを再発行して無効化してください（公開ページにトークンが載るため）。</div>
     </div>
   </main>
@@ -171,8 +172,15 @@
       return path;
     }
 
-    function setStatus(msg) {
-      document.getElementById("status").innerHTML = msg;
+    function setStatus(html) {
+      document.getElementById("status").innerHTML = html;
+    }
+
+    function removeExistingEmbedScripts() {
+      var olds = document.querySelectorAll('script[data-dify-embed="1"]');
+      olds.forEach(function (el) {
+        el.remove();
+      });
     }
 
     function loadEmbed(baseUrl, token, scriptPath) {
@@ -194,26 +202,33 @@
         userVariables: {}
       };
 
-      var old = document.getElementById("dify-embed-script");
-      if (old) old.remove();
+      removeExistingEmbedScripts();
 
       var s = document.createElement("script");
-      s.id = "dify-embed-script";
+      s.setAttribute("data-dify-embed", "1");
+
+      // 重要: Difyの埋め込みは scriptタグの id に token を置く実装が多い
+      s.id = token;
+
       s.src = scriptUrl;
       s.defer = true;
+      s.referrerPolicy = "no-referrer";
+
       s.onload = function () {
         setStatus(
-          "状態: embed.min.js 読み込み成功。右下にボタンが出るはずです。<br>" +
-          "<small>baseUrl: <code>" + baseUrl + "</code> / script: <code>" + scriptUrl + "</code></small>"
+          "状態: embedスクリプト読み込み成功。右下にボタンが出るはずです。<br>" +
+          "<small>baseUrl: <code>" + baseUrl + "</code><br>script: <code>" + scriptUrl + "</code><br>token: <code>" + token + "</code></small>"
         );
       };
+
       s.onerror = function () {
         setStatus(
-          "状態: embed.min.js 読み込み失敗。URLかパスが違います。<br>" +
+          "状態: embedスクリプト読み込み失敗。URLかパスが違うか、ブラウザがブロックしています。<br>" +
           "<small>script: <code>" + scriptUrl + "</code></small><br>" +
-          "<small>対策: 1) トンネルが生きているか 2) " + scriptPath + " が存在するか 3) DifyのEmbed画面のパスと一致しているか</small>"
+          "<small>対策: 1) 「JSを別タブで開く」で表示できるか 2) Difyの埋め込みコードに出るパスと一致しているか 3) トンネルが生きているか</small>"
         );
       };
+
       document.body.appendChild(s);
     }
 
@@ -236,7 +251,8 @@
       return { baseUrl: baseUrl, token: token, scriptPath: scriptPath };
     }
 
-    function testScriptUrl(baseUrl, scriptPath) {
+    // CORSで誤判定しないため、no-corsで「到達できるか」だけ見る
+    function testScriptReachability(baseUrl, scriptPath) {
       baseUrl = normalizeBaseUrl(baseUrl);
       scriptPath = normalizeScriptPath(scriptPath);
       if (!baseUrl) {
@@ -244,23 +260,32 @@
         return;
       }
       var scriptUrl = baseUrl + scriptPath;
-      fetch(scriptUrl, { method: "GET" })
-        .then(function (r) {
-          if (!r.ok) throw new Error("HTTP " + r.status);
-          return r.text();
-        })
-        .then(function (t) {
+
+      fetch(scriptUrl, { method: "GET", mode: "no-cors", cache: "no-store" })
+        .then(function () {
           setStatus(
-            "状態: JS取得テスト成功。<br><small>script: <code>" + scriptUrl + "</code></small>"
+            "状態: JS到達テストOK（no-cors）。<br>" +
+            "<small>script: <code>" + scriptUrl + "</code><br>補足: no-corsのため中身は検査できません。次に「保存して起動」を押してください。</small>"
           );
         })
         .catch(function (e) {
           setStatus(
-            "状態: JS取得テスト失敗。<br>" +
+            "状態: JS到達テスト失敗（ネットワーク到達不可）。<br>" +
             "<small>script: <code>" + scriptUrl + "</code></small><br>" +
             "<small>エラー: " + String(e) + "</small>"
           );
         });
+    }
+
+    function openScriptInNewTab(baseUrl, scriptPath) {
+      baseUrl = normalizeBaseUrl(baseUrl);
+      scriptPath = normalizeScriptPath(scriptPath);
+      if (!baseUrl) {
+        setStatus("状態: トンネルURLが空です。");
+        return;
+      }
+      var scriptUrl = baseUrl + scriptPath;
+      window.open(scriptUrl, "_blank", "noopener,noreferrer");
     }
 
     document.getElementById("saveAndStart").addEventListener("click", function () {
@@ -272,7 +297,13 @@
     document.getElementById("testScript").addEventListener("click", function () {
       var baseUrl = document.getElementById("baseUrl").value;
       var scriptPath = document.getElementById("scriptPath").value;
-      testScriptUrl(baseUrl, scriptPath);
+      testScriptReachability(baseUrl, scriptPath);
+    });
+
+    document.getElementById("openScript").addEventListener("click", function () {
+      var baseUrl = document.getElementById("baseUrl").value;
+      var scriptPath = document.getElementById("scriptPath").value;
+      openScriptInNewTab(baseUrl, scriptPath);
     });
 
     document.getElementById("clear").addEventListener("click", function () {
@@ -283,8 +314,7 @@
       document.getElementById("token").value = "";
       document.getElementById("scriptPath").value = "/embed.min.js";
       setStatus("状態: クリアしました。再入力してください。");
-      var old = document.getElementById("dify-embed-script");
-      if (old) old.remove();
+      removeExistingEmbedScripts();
     });
 
     (function init() {
