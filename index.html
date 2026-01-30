@@ -32,12 +32,6 @@
       max-width: 900px;
       margin: 0 auto;
     }
-    #status-text {
-      font-size: 12px;
-      color: #666;
-      margin-top: 4px;
-      min-height: 1.4em;
-    }
 
     /* Dify バブルの色やサイズを調整 */
     #dify-chatbot-bubble-button {
@@ -53,25 +47,23 @@
   <header>
     <h1>AP BOT</h1>
     <p>右下のボタンからチャットボットを利用できます。</p>
-    <div id="status-text"></div>
   </header>
 
   <main>
-    <!-- プレゼン用なので本体の説明は何も置かない -->
+    <!-- プレゼン用なので本体の説明・メッセージは何も置かない -->
   </main>
 
   <script>
-    // 必要ならここにデフォルト値を入れる
-    // クイックトンネルを毎回張り直すなら空のままにして、
-    // 別ページやローカル設定から localStorage を使って上書きする運用でもよい
-    const DEFAULT_BASE_URL = "";
-    const DEFAULT_TOKEN = "";
-    const DEFAULT_SCRIPT_PATH = "/embed.min.js";
+    // ここを書き換える
+    // Dify の埋め込みで使っている baseUrl と token を入れる
+    // 例:
+    // const DEFAULT_BASE_URL = "https://xxxxx.trycloudflare.com";
+    // const DEFAULT_TOKEN = "ZDPHnH6mn8ISpPTh";
+    // const DEFAULT_SCRIPT_PATH = "/embed.min.js";
 
-    function setStatus(text) {
-      var el = document.getElementById("status-text");
-      if (el) el.textContent = text;
-    }
+    const DEFAULT_BASE_URL = "ここにあなたの baseUrl";
+    const DEFAULT_TOKEN = "ここにあなたの token";
+    const DEFAULT_SCRIPT_PATH = "/embed.min.js";
 
     function normalizeBaseUrl(url) {
       if (!url) return "";
@@ -94,11 +86,13 @@
       });
     }
 
-    function loadSettingsFromLocalStorage() {
+    function loadSettings() {
+      // localStorage に ap_demo_* があればそれを優先
       var baseUrl = localStorage.getItem("ap_demo_baseUrl") || "";
       var token = localStorage.getItem("ap_demo_token") || "";
       var scriptPath = localStorage.getItem("ap_demo_scriptPath") || "";
 
+      // 何もなければ DEFAULT を使う
       if (!baseUrl && DEFAULT_BASE_URL) baseUrl = DEFAULT_BASE_URL;
       if (!token && DEFAULT_TOKEN) token = DEFAULT_TOKEN;
       if (!scriptPath) scriptPath = DEFAULT_SCRIPT_PATH;
@@ -111,8 +105,7 @@
       scriptPath = normalizeScriptPath(scriptPath);
 
       if (!baseUrl || !token) {
-        setStatus("チャットボットを起動できません。");
-        console.error("baseUrl または token が空です。");
+        console.error("Dify embed: baseUrl または token が空のため起動できません。");
         return;
       }
 
@@ -136,30 +129,24 @@
       s.referrerPolicy = "no-referrer";
 
       s.onload = function () {
-        setStatus("");
-        console.log("Dify embed loaded", scriptUrl);
+        console.log("Dify embed loaded:", scriptUrl);
       };
 
       s.onerror = function () {
-        setStatus("チャットボットの読み込みに失敗しました。");
-        console.error("Dify embed script load failed", scriptUrl);
+        console.error("Dify embed script load failed:", scriptUrl);
       };
 
       document.body.appendChild(s);
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-      var s = loadSettingsFromLocalStorage();
-      if (!s.baseUrl && !s.token && !DEFAULT_BASE_URL && !DEFAULT_TOKEN) {
-        setStatus("チャットボットを起動できません。");
-        console.error("設定が存在しないためチャットボットを起動できません。");
-        return;
-      }
+      var s = loadSettings();
       loadEmbed(s.baseUrl, s.token, s.scriptPath);
     });
   </script>
 </body>
 </html>
+
 
 
 <script>
@@ -196,4 +183,5 @@
     height: 40rem !important;
   }
 </style>
+
 
