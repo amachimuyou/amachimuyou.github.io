@@ -54,13 +54,8 @@
   </main>
 
   <script>
-    // ここを書き換える
-    // Dify の埋め込みで使っている baseUrl と token を入れる
-    // 例:
-    // const DEFAULT_BASE_URL = "https://xxxxx.trycloudflare.com";
-    // const DEFAULT_TOKEN = "ZDPHnH6mn8ISpPTh";
-    // const DEFAULT_SCRIPT_PATH = "/embed.min.js";
-
+    // Dify の埋め込みで使っている baseUrl と token
+    // 必要に応じてここだけ書き換える
     const DEFAULT_BASE_URL = "https://laser-you-participating-suse.trycloudflare.com";
     const DEFAULT_TOKEN = "ZDPHnH6mn8ISpPTh";
     const DEFAULT_SCRIPT_PATH = "/embed.min.js";
@@ -86,23 +81,10 @@
       });
     }
 
-    function loadSettings() {
-      // localStorage に ap_demo_* があればそれを優先
-      var baseUrl = localStorage.getItem("ap_demo_baseUrl") || "";
-      var token = localStorage.getItem("ap_demo_token") || "";
-      var scriptPath = localStorage.getItem("ap_demo_scriptPath") || "";
-
-      // 何もなければ DEFAULT を使う
-      if (!baseUrl && DEFAULT_BASE_URL) baseUrl = DEFAULT_BASE_URL;
-      if (!token && DEFAULT_TOKEN) token = DEFAULT_TOKEN;
-      if (!scriptPath) scriptPath = DEFAULT_SCRIPT_PATH;
-
-      return { baseUrl: baseUrl, token: token, scriptPath: scriptPath };
-    }
-
-    function loadEmbed(baseUrl, token, scriptPath) {
-      baseUrl = normalizeBaseUrl(baseUrl);
-      scriptPath = normalizeScriptPath(scriptPath);
+    function loadEmbed() {
+      var baseUrl = normalizeBaseUrl(DEFAULT_BASE_URL);
+      var token = DEFAULT_TOKEN;
+      var scriptPath = normalizeScriptPath(DEFAULT_SCRIPT_PATH);
 
       if (!baseUrl || !token) {
         console.error("Dify embed: baseUrl または token が空のため起動できません。");
@@ -140,45 +122,8 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-      var s = loadSettings();
-      loadEmbed(s.baseUrl, s.token, s.scriptPath);
+      loadEmbed();
     });
   </script>
 </body>
 </html>
-
-<script>
- window.difyChatbotConfig = {
-  token: 'ZDPHnH6mn8ISpPTh',
-  baseUrl: 'http://localhost',
-  inputs: {
-    // You can define the inputs from the Start node here
-    // key is the variable name
-    // e.g.
-    // name: "NAME"
-  },
-  systemVariables: {
-    // user_id: 'YOU CAN DEFINE USER ID HERE',
-    // conversation_id: 'YOU CAN DEFINE CONVERSATION ID HERE, IT MUST BE A VALID UUID',
-  },
-  userVariables: {
-    // avatar_url: 'YOU CAN DEFINE USER AVATAR URL HERE',
-    // name: 'YOU CAN DEFINE USER NAME HERE',
-  },
- }
-</script>
-<script
- src="http://localhost/embed.min.js"
- id="ZDPHnH6mn8ISpPTh"
- defer>
-</script>
-<style>
-  #dify-chatbot-bubble-button {
-    background-color: #1C64F2 !important;
-  }
-  #dify-chatbot-bubble-window {
-    width: 24rem !important;
-    height: 40rem !important;
-  }
-</style>
-
