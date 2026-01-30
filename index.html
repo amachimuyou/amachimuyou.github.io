@@ -63,7 +63,7 @@
   <script>
     // 必要ならここにデフォルト値を入れる
     // クイックトンネルを毎回張り直すなら空のままにして、
-    // ap-config 側の localStorage 設定だけ使う運用でもよい
+    // 別ページやローカル設定から localStorage を使って上書きする運用でもよい
     const DEFAULT_BASE_URL = "";
     const DEFAULT_TOKEN = "";
     const DEFAULT_SCRIPT_PATH = "/embed.min.js";
@@ -111,7 +111,7 @@
       scriptPath = normalizeScriptPath(scriptPath);
 
       if (!baseUrl || !token) {
-        setStatus("設定がありません。ap-config 側でトンネルURLとトークンを保存してください。");
+        setStatus("チャットボットを起動できません。");
         console.error("baseUrl または token が空です。");
         return;
       }
@@ -136,12 +136,12 @@
       s.referrerPolicy = "no-referrer";
 
       s.onload = function () {
-        setStatus("チャットボット接続に成功しました。");
+        setStatus("");
         console.log("Dify embed loaded", scriptUrl);
       };
 
       s.onerror = function () {
-        setStatus("チャットボットの読み込みに失敗しました。Dify とトンネルURLを確認してください。");
+        setStatus("チャットボットの読み込みに失敗しました。");
         console.error("Dify embed script load failed", scriptUrl);
       };
 
@@ -151,7 +151,8 @@
     document.addEventListener("DOMContentLoaded", function () {
       var s = loadSettingsFromLocalStorage();
       if (!s.baseUrl && !s.token && !DEFAULT_BASE_URL && !DEFAULT_TOKEN) {
-        setStatus("設定がないためチャットボットを起動できません。");
+        setStatus("チャットボットを起動できません。");
+        console.error("設定が存在しないためチャットボットを起動できません。");
         return;
       }
       loadEmbed(s.baseUrl, s.token, s.scriptPath);
@@ -159,6 +160,7 @@
   </script>
 </body>
 </html>
+
 
 <script>
  window.difyChatbotConfig = {
@@ -194,3 +196,4 @@
     height: 40rem !important;
   }
 </style>
+
