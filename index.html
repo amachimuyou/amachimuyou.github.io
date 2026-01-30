@@ -18,7 +18,7 @@
     }
     header h1 {
       margin: 0;
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 700;
     }
     header p {
@@ -28,56 +28,27 @@
       line-height: 1.5;
     }
     main {
-      padding: 16px 20px 24px 20px;
-      max-width: 1100px;
+      padding: 20px;
+      max-width: 900px;
       margin: 0 auto;
     }
     .card {
       background: #ffffff;
       border: 1px solid #e6e8ee;
       border-radius: 12px;
-      overflow: hidden;
+      padding: 18px 16px;
       box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-      padding: 16px;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
-    .row {
-      display: grid;
-      grid-template-columns: 180px 1fr;
-      gap: 10px;
-      align-items: center;
-      margin: 10px 0;
+    .card h2 {
+      margin: 0 0 8px 0;
+      font-size: 16px;
     }
-    label {
-      font-size: 13px;
+    .card p {
+      margin: 4px 0;
+      font-size: 14px;
+      line-height: 1.7;
       color: #333;
-    }
-    input {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #d7dbe6;
-      border-radius: 10px;
-      font-size: 14px;
-      background: #fff;
-      box-sizing: border-box;
-    }
-    .btns {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
-    button {
-      appearance: none;
-      border: 1px solid #d7dbe6;
-      background: #fff;
-      padding: 10px 12px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    button.primary {
-      border-color: #1C64F2;
     }
     .note {
       font-size: 12px;
@@ -92,72 +63,57 @@
       background: #f0f2f6;
       padding: 2px 6px;
       border-radius: 6px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
     }
-    .status {
-      font-size: 13px;
-      line-height: 1.6;
-      color: #111;
+
+    /* Dify バブルの色やサイズを調整 */
+    #dify-chatbot-bubble-button {
+      background-color: #1C64F2 !important;
     }
-    .status small {
-      color: #555;
+    #dify-chatbot-bubble-window {
+      width: 24rem !important;
+      height: 40rem !important;
     }
   </style>
 </head>
 <body>
   <header>
     <h1>AP BOT デモ</h1>
-    <p>ローカルDifyをCloudflare Quick TunnelでHTTPS公開し、このページから埋め込み起動します。</p>
+    <p>右下のボタンから、ローカル Dify を使ったチャットボットに接続します。</p>
   </header>
 
   <main>
-    <div class="card">
-      <div class="status" id="status">
-        状態: 未設定。下のフォームにトンネルURLとトークンを入れてください。
-        <br><small>注意: PowerShellでcloudflaredを起動したままにしてください。閉じると公開が止まります。</small>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="row">
-        <label for="baseUrl">トンネルURL</label>
-        <input id="baseUrl" type="text" placeholder="例: https://xxxxx.trycloudflare.com" />
-      </div>
-
-      <div class="row">
-        <label for="token">埋め込みトークン</label>
-        <input id="token" type="text" placeholder="例: ZDPHnH6mn8ISpPTh" />
-      </div>
-
-      <div class="row">
-        <label for="scriptPath">embedのパス</label>
-        <input id="scriptPath" type="text" value="/embed.min.js" />
-      </div>
-
-      <div class="btns">
-        <button class="primary" id="saveAndStart">保存して起動</button>
-        <button id="testScript">JS到達テスト</button>
-        <button id="openScript">JSを別タブで開く</button>
-        <button id="clear">クリア</button>
-      </div>
-
-      <div class="note" style="margin-top:12px;">
-        <div>手順</div>
-        <div>1) PowerShellで <code>cloudflared tunnel --url http://localhost:80</code> を起動</div>
-        <div>2) 表示された <code>https://xxxxx.trycloudflare.com</code> を「トンネルURL」に貼る</div>
-        <div>3) ローカルDifyの「公開する」→「埋め込み」で token を貼る</div>
-        <div>4) 「保存して起動」</div>
-        <div style="margin-top:8px;">embedのパスが <code>/embed.min.js</code> でない場合は、Difyの埋め込みコードに出るscriptのパスをそのまま入れてください。</div>
-      </div>
+    <div class="card" id="info-card">
+      <h2>デモ用ページ</h2>
+      <p>このページは、設定済みの Dify 埋め込み情報を使ってチャットボットを起動します。</p>
+      <p>右下にチャットボタンが出ていれば、接続成功です。</p>
+      <p id="status-text" style="font-size:13px; color:#555; margin-top:8px;"></p>
     </div>
 
     <div class="note">
-      <div>現実</div>
-      <div>GitHub Pagesから <code>http://localhost</code> には届きません。必ずトンネルの <code>https://...</code> が必要です。</div>
-      <div>デモ後はトークンを再発行して無効化してください（公開ページにトークンが載るため）。</div>
+      <div>事前準備</div>
+      <div>1 Dify と Cloudflare Quick Tunnel を起動しておく</div>
+      <div>2 <code>/ap-config.html</code> を開き、トンネルURLとトークンを保存しておく</div>
+      <div>3 本番ではこのページ（トップページ）だけを表示する</div>
     </div>
   </main>
 
   <script>
+    // 必要ならここにデフォルト値を入れる（なくても動く）
+    // const DEFAULT_BASE_URL = "https://xxxxx.trycloudflare.com";
+    // const DEFAULT_TOKEN = "ここに Dify の埋め込みトークン";
+    // const DEFAULT_SCRIPT_PATH = "/embed.min.js";
+
+    const DEFAULT_BASE_URL = "";
+    const DEFAULT_TOKEN = "";
+    const DEFAULT_SCRIPT_PATH = "/embed.min.js";
+
+    function setStatus(text) {
+      var el = document.getElementById("status-text");
+      if (el) el.textContent = text;
+    }
+
     function normalizeBaseUrl(url) {
       if (!url) return "";
       url = url.trim();
@@ -172,10 +128,6 @@
       return path;
     }
 
-    function setStatus(html) {
-      document.getElementById("status").innerHTML = html;
-    }
-
     function removeExistingEmbedScripts() {
       var olds = document.querySelectorAll('script[data-dify-embed="1"]');
       olds.forEach(function (el) {
@@ -183,12 +135,25 @@
       });
     }
 
+    function loadSettingsFromLocalStorage() {
+      var baseUrl = localStorage.getItem("ap_demo_baseUrl") || "";
+      var token = localStorage.getItem("ap_demo_token") || "";
+      var scriptPath = localStorage.getItem("ap_demo_scriptPath") || "";
+
+      if (!baseUrl && DEFAULT_BASE_URL) baseUrl = DEFAULT_BASE_URL;
+      if (!token && DEFAULT_TOKEN) token = DEFAULT_TOKEN;
+      if (!scriptPath) scriptPath = DEFAULT_SCRIPT_PATH;
+
+      return { baseUrl: baseUrl, token: token, scriptPath: scriptPath };
+    }
+
     function loadEmbed(baseUrl, token, scriptPath) {
       baseUrl = normalizeBaseUrl(baseUrl);
       scriptPath = normalizeScriptPath(scriptPath);
 
       if (!baseUrl || !token) {
-        setStatus("状態: 設定不足。トンネルURLとトークンを入力してください。");
+        setStatus("設定が見つかりません。ap-config.html でトンネルURLとトークンを保存してください。");
+        console.error("baseUrl または token が空です。");
         return;
       }
 
@@ -206,133 +171,32 @@
 
       var s = document.createElement("script");
       s.setAttribute("data-dify-embed", "1");
-
-      // 重要: Difyの埋め込みは scriptタグの id に token を置く実装が多い
       s.id = token;
-
       s.src = scriptUrl;
       s.defer = true;
       s.referrerPolicy = "no-referrer";
 
       s.onload = function () {
-        setStatus(
-          "状態: embedスクリプト読み込み成功。右下にボタンが出るはずです。<br>" +
-          "<small>baseUrl: <code>" + baseUrl + "</code><br>script: <code>" + scriptUrl + "</code><br>token: <code>" + token + "</code></small>"
-        );
+        setStatus("チャットボットの読み込みに成功しました。右下のボタンから会話を開始できます。");
+        console.log("Dify embed loaded", scriptUrl);
       };
 
       s.onerror = function () {
-        setStatus(
-          "状態: embedスクリプト読み込み失敗。URLかパスが違うか、ブラウザがブロックしています。<br>" +
-          "<small>script: <code>" + scriptUrl + "</code></small><br>" +
-          "<small>対策: 1) 「JSを別タブで開く」で表示できるか 2) Difyの埋め込みコードに出るパスと一致しているか 3) トンネルが生きているか</small>"
-        );
+        setStatus("チャットボットの読み込みに失敗しました。Dify / トンネルURL / パスを確認してください。");
+        console.error("Dify embed script load failed", scriptUrl);
       };
 
       document.body.appendChild(s);
     }
 
-    function saveSettings() {
-      var baseUrl = document.getElementById("baseUrl").value;
-      var token = document.getElementById("token").value;
-      var scriptPath = document.getElementById("scriptPath").value;
-      localStorage.setItem("ap_demo_baseUrl", baseUrl);
-      localStorage.setItem("ap_demo_token", token);
-      localStorage.setItem("ap_demo_scriptPath", scriptPath);
-    }
-
-    function loadSettings() {
-      var baseUrl = localStorage.getItem("ap_demo_baseUrl") || "";
-      var token = localStorage.getItem("ap_demo_token") || "";
-      var scriptPath = localStorage.getItem("ap_demo_scriptPath") || "/embed.min.js";
-      document.getElementById("baseUrl").value = baseUrl;
-      document.getElementById("token").value = token;
-      document.getElementById("scriptPath").value = scriptPath;
-      return { baseUrl: baseUrl, token: token, scriptPath: scriptPath };
-    }
-
-    // CORSで誤判定しないため、no-corsで「到達できるか」だけ見る
-    function testScriptReachability(baseUrl, scriptPath) {
-      baseUrl = normalizeBaseUrl(baseUrl);
-      scriptPath = normalizeScriptPath(scriptPath);
-      if (!baseUrl) {
-        setStatus("状態: トンネルURLが空です。");
+    document.addEventListener("DOMContentLoaded", function () {
+      var s = loadSettingsFromLocalStorage();
+      if (!s.baseUrl && !s.token && !DEFAULT_BASE_URL && !DEFAULT_TOKEN) {
+        setStatus("まだ設定がありません。まず ap-config.html でトンネルURLとトークンを保存してください。");
         return;
       }
-      var scriptUrl = baseUrl + scriptPath;
-
-      fetch(scriptUrl, { method: "GET", mode: "no-cors", cache: "no-store" })
-        .then(function () {
-          setStatus(
-            "状態: JS到達テストOK（no-cors）。<br>" +
-            "<small>script: <code>" + scriptUrl + "</code><br>補足: no-corsのため中身は検査できません。次に「保存して起動」を押してください。</small>"
-          );
-        })
-        .catch(function (e) {
-          setStatus(
-            "状態: JS到達テスト失敗（ネットワーク到達不可）。<br>" +
-            "<small>script: <code>" + scriptUrl + "</code></small><br>" +
-            "<small>エラー: " + String(e) + "</small>"
-          );
-        });
-    }
-
-    function openScriptInNewTab(baseUrl, scriptPath) {
-      baseUrl = normalizeBaseUrl(baseUrl);
-      scriptPath = normalizeScriptPath(scriptPath);
-      if (!baseUrl) {
-        setStatus("状態: トンネルURLが空です。");
-        return;
-      }
-      var scriptUrl = baseUrl + scriptPath;
-      window.open(scriptUrl, "_blank", "noopener,noreferrer");
-    }
-
-    document.getElementById("saveAndStart").addEventListener("click", function () {
-      saveSettings();
-      var s = loadSettings();
       loadEmbed(s.baseUrl, s.token, s.scriptPath);
     });
-
-    document.getElementById("testScript").addEventListener("click", function () {
-      var baseUrl = document.getElementById("baseUrl").value;
-      var scriptPath = document.getElementById("scriptPath").value;
-      testScriptReachability(baseUrl, scriptPath);
-    });
-
-    document.getElementById("openScript").addEventListener("click", function () {
-      var baseUrl = document.getElementById("baseUrl").value;
-      var scriptPath = document.getElementById("scriptPath").value;
-      openScriptInNewTab(baseUrl, scriptPath);
-    });
-
-    document.getElementById("clear").addEventListener("click", function () {
-      localStorage.removeItem("ap_demo_baseUrl");
-      localStorage.removeItem("ap_demo_token");
-      localStorage.removeItem("ap_demo_scriptPath");
-      document.getElementById("baseUrl").value = "";
-      document.getElementById("token").value = "";
-      document.getElementById("scriptPath").value = "/embed.min.js";
-      setStatus("状態: クリアしました。再入力してください。");
-      removeExistingEmbedScripts();
-    });
-
-    (function init() {
-      var s = loadSettings();
-      if (s.baseUrl && s.token) {
-        loadEmbed(s.baseUrl, s.token, s.scriptPath);
-      }
-    })();
   </script>
-
-  <style>
-    #dify-chatbot-bubble-button {
-      background-color: #1C64F2 !important;
-    }
-    #dify-chatbot-bubble-window {
-      width: 24rem !important;
-      height: 40rem !important;
-    }
-  </style>
 </body>
 </html>
