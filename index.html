@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AP BOT デモ</title>
+  <title>AP BOT</title>
   <style>
     body {
       margin: 0;
@@ -12,59 +12,31 @@
       color: #111;
     }
     header {
-      padding: 16px 20px;
+      padding: 12px 20px;
       background: #ffffff;
       border-bottom: 1px solid #e6e8ee;
     }
     header h1 {
       margin: 0;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
     }
     header p {
-      margin: 6px 0 0 0;
-      font-size: 13px;
-      color: #444;
+      margin: 4px 0 0 0;
+      font-size: 12px;
+      color: #555;
       line-height: 1.5;
     }
     main {
-      padding: 20px;
+      padding: 8px 20px;
       max-width: 900px;
       margin: 0 auto;
     }
-    .card {
-      background: #ffffff;
-      border: 1px solid #e6e8ee;
-      border-radius: 12px;
-      padding: 18px 16px;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-      margin-bottom: 16px;
-    }
-    .card h2 {
-      margin: 0 0 8px 0;
-      font-size: 16px;
-    }
-    .card p {
-      margin: 4px 0;
-      font-size: 14px;
-      line-height: 1.7;
-      color: #333;
-    }
-    .note {
+    #status-text {
       font-size: 12px;
-      color: #555;
-      line-height: 1.6;
-      background: #ffffff;
-      border: 1px solid #e6e8ee;
-      border-radius: 12px;
-      padding: 12px 14px;
-    }
-    code {
-      background: #f0f2f6;
-      padding: 2px 6px;
-      border-radius: 6px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+      min-height: 1.4em;
     }
 
     /* Dify バブルの色やサイズを調整 */
@@ -79,32 +51,19 @@
 </head>
 <body>
   <header>
-    <h1>AP BOT デモ</h1>
-    <p>右下のボタンから、ローカル Dify を使ったチャットボットに接続します。</p>
+    <h1>AP BOT</h1>
+    <p>右下のボタンからチャットボットを利用できます。</p>
+    <div id="status-text"></div>
   </header>
 
   <main>
-    <div class="card" id="info-card">
-      <h2>デモ用ページ</h2>
-      <p>このページは、設定済みの Dify 埋め込み情報を使ってチャットボットを起動します。</p>
-      <p>右下にチャットボタンが出ていれば、接続成功です。</p>
-      <p id="status-text" style="font-size:13px; color:#555; margin-top:8px;"></p>
-    </div>
-
-    <div class="note">
-      <div>事前準備</div>
-      <div>1 Dify と Cloudflare Quick Tunnel を起動しておく</div>
-      <div>2 <code>/ap-config.html</code> を開き、トンネルURLとトークンを保存しておく</div>
-      <div>3 本番ではこのページ（トップページ）だけを表示する</div>
-    </div>
+    <!-- プレゼン用なので本体の説明は何も置かない -->
   </main>
 
   <script>
-    // 必要ならここにデフォルト値を入れる（なくても動く）
-    // const DEFAULT_BASE_URL = "https://xxxxx.trycloudflare.com";
-    // const DEFAULT_TOKEN = "ここに Dify の埋め込みトークン";
-    // const DEFAULT_SCRIPT_PATH = "/embed.min.js";
-
+    // 必要ならここにデフォルト値を入れる
+    // クイックトンネルを毎回張り直すなら空のままにして、
+    // ap-config 側の localStorage 設定だけ使う運用でもよい
     const DEFAULT_BASE_URL = "";
     const DEFAULT_TOKEN = "";
     const DEFAULT_SCRIPT_PATH = "/embed.min.js";
@@ -152,7 +111,7 @@
       scriptPath = normalizeScriptPath(scriptPath);
 
       if (!baseUrl || !token) {
-        setStatus("設定が見つかりません。ap-config.html でトンネルURLとトークンを保存してください。");
+        setStatus("設定がありません。ap-config 側でトンネルURLとトークンを保存してください。");
         console.error("baseUrl または token が空です。");
         return;
       }
@@ -177,12 +136,12 @@
       s.referrerPolicy = "no-referrer";
 
       s.onload = function () {
-        setStatus("チャットボットの読み込みに成功しました。右下のボタンから会話を開始できます。");
+        setStatus("チャットボット接続に成功しました。");
         console.log("Dify embed loaded", scriptUrl);
       };
 
       s.onerror = function () {
-        setStatus("チャットボットの読み込みに失敗しました。Dify / トンネルURL / パスを確認してください。");
+        setStatus("チャットボットの読み込みに失敗しました。Dify とトンネルURLを確認してください。");
         console.error("Dify embed script load failed", scriptUrl);
       };
 
@@ -192,7 +151,7 @@
     document.addEventListener("DOMContentLoaded", function () {
       var s = loadSettingsFromLocalStorage();
       if (!s.baseUrl && !s.token && !DEFAULT_BASE_URL && !DEFAULT_TOKEN) {
-        setStatus("まだ設定がありません。まず ap-config.html でトンネルURLとトークンを保存してください。");
+        setStatus("設定がないためチャットボットを起動できません。");
         return;
       }
       loadEmbed(s.baseUrl, s.token, s.scriptPath);
@@ -235,4 +194,3 @@
     height: 40rem !important;
   }
 </style>
-
