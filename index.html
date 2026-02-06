@@ -33,8 +33,6 @@
       max-width: 900px;
       margin: 0 auto;
     }
-
-    /* Dify バブルの色やサイズを調整 */
     #dify-chatbot-bubble-button {
       background-color: #1C64F2 !important;
     }
@@ -53,12 +51,6 @@
   <main></main>
 
   <script>
-    /**
-     * 外部（GitHub Pages等）から Dify を埋め込む場合：
-     * - baseUrl に /v1 は付けない（オリジンのみ）
-     * - embed スクリプトは baseUrl + "/embed.min.js"
-     * - Quick Tunnel(trycloudflare)はURLが変わるので、変わったらここを書き換える
-     */
     const DEFAULT_BASE_URL = "https://pipe-furnished-flags-olympic.trycloudflare.com";
     const DEFAULT_TOKEN = "ZDPHnH6mn8ISpPTh";
     const DEFAULT_SCRIPT_PATH = "/embed.min.js";
@@ -66,9 +58,7 @@
     function normalizeBaseUrl(url) {
       if (!url) return "";
       url = String(url).trim();
-      // 末尾スラッシュを削除
-      url = url.replace(/\/+$/, "");
-      return url;
+      return url.replace(/\/+$/, "");
     }
 
     function normalizeScriptPath(path) {
@@ -79,8 +69,7 @@
     }
 
     function removeExistingEmbedScripts() {
-      const olds = document.querySelectorAll('script[data-dify-embed="1"]');
-      olds.forEach((el) => el.remove());
+      document.querySelectorAll('script[data-dify-embed="1"]').forEach((el) => el.remove());
     }
 
     function loadEmbed() {
@@ -95,7 +84,6 @@
 
       const scriptUrl = baseUrl + scriptPath;
 
-      // Dify が参照するグローバル設定
       window.difyChatbotConfig = {
         token: token,
         baseUrl: baseUrl,
@@ -104,10 +92,8 @@
         userVariables: {}
       };
 
-      // 同一ページ内での二重読込を避ける
       removeExistingEmbedScripts();
 
-      // embed スクリプトをロード
       const s = document.createElement("script");
       s.setAttribute("data-dify-embed", "1");
       s.id = token;
@@ -118,7 +104,6 @@
       s.onload = function () {
         console.log("Dify embed loaded:", scriptUrl);
       };
-
       s.onerror = function () {
         console.error("Dify embed script load failed:", scriptUrl);
       };
@@ -128,42 +113,5 @@
 
     document.addEventListener("DOMContentLoaded", loadEmbed);
   </script>
-
-<script>
- window.difyChatbotConfig = {
-  token: 'ZDPHnH6mn8ISpPTh',
-  baseUrl: 'http://localhost',
-  inputs: {
-    // You can define the inputs from the Start node here
-    // key is the variable name
-    // e.g.
-    // name: "NAME"
-  },
-  systemVariables: {
-    // user_id: 'YOU CAN DEFINE USER ID HERE',
-    // conversation_id: 'YOU CAN DEFINE CONVERSATION ID HERE, IT MUST BE A VALID UUID',
-  },
-  userVariables: {
-    // avatar_url: 'YOU CAN DEFINE USER AVATAR URL HERE',
-    // name: 'YOU CAN DEFINE USER NAME HERE',
-  },
- }
-</script>
-<script
- src="http://localhost/embed.min.js"
- id="ZDPHnH6mn8ISpPTh"
- defer>
-</script>
-<style>
-  #dify-chatbot-bubble-button {
-    background-color: #1C64F2 !important;
-  }
-  #dify-chatbot-bubble-window {
-    width: 24rem !important;
-    height: 40rem !important;
-  }
-</style>
 </body>
 </html>
-
-
