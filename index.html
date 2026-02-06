@@ -53,13 +53,13 @@
   <main></main>
 
   <script>
-    /*
-      GitHub Pages など「外部」から埋め込む場合：
-      - baseUrl は /v1 を付けない（オリジンのみ）
-      - script も同じオリジンの /embed.min.js
-      - APIベースURL (http://localhost/v1) は「埋め込み用 baseUrl」ではない
-    */
-    const DEFAULT_BASE_URL = "https://analyst-postcards-dictionary-significant.trycloudflare.com";
+    /**
+     * 外部（GitHub Pages等）から Dify を埋め込む場合：
+     * - baseUrl に /v1 は付けない（オリジンのみ）
+     * - embed スクリプトは baseUrl + "/embed.min.js"
+     * - Quick Tunnel(trycloudflare)はURLが変わるので、変わったらここを書き換える
+     */
+    const DEFAULT_BASE_URL = "https://pipe-furnished-flags-olympic.trycloudflare.com";
     const DEFAULT_TOKEN = "ZDPHnH6mn8ISpPTh";
     const DEFAULT_SCRIPT_PATH = "/embed.min.js";
 
@@ -128,5 +128,11 @@
 
     document.addEventListener("DOMContentLoaded", loadEmbed);
   </script>
+
+  <!--
+    重要:
+    下に "http://localhost" の埋め込みコードを追加しないこと。
+    GitHub Pages では localhost は到達不可なので確実に壊れます。
+  -->
 </body>
 </html>
